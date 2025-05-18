@@ -1,108 +1,86 @@
-const questions = [
+const preguntas = [
   {
-    question: "¿Cuál es mi color favorito?",
-    options: ["Negro", "Azul", "Rojo", "Verde"],
-    answer: "Negro"
+    pregunta: "¿Cuándo nací?",
+    opciones: ["7 de diciembre", "14 de febrero", "25 de diciembre", "1 de enero"],
+    respuesta: "7 de diciembre"
   },
   {
-    question: "¿Dónde nos conocimos tú y yo?",
-    options: ["En el barrio", "En el colegio", "En una fiesta", "Por redes sociales"],
-    answer: "En el barrio"
+    pregunta: "¿Qué tipo de series o películas me gustan más?",
+    opciones: ["Comedia", "Anime", "Terror", "Drama"],
+    respuesta: "Anime"
   },
   {
-    question: "¿Qué tipo de cosas disfruto ver?",
-    options: ["Películas de acción", "Series románticas", "Anime", "Deportes"],
-    answer: "Anime"
+    pregunta: "¿Cuál es mi película favorita?",
+    opciones: ["Titanic", "Rápidos y Furiosos", "Rocky", "Avengers"],
+    respuesta: "Rocky"
   },
   {
-    question: "¿Me gustan mucho las fiestas?",
-    options: ["Sí, me encantan", "Solo si tú vas", "No tanto", "¡Amo bailar sin parar!"],
-    answer: "No tanto"
+    pregunta: "¿Dónde nací?",
+    opciones: ["Bogotá", "Maracaibo", "Caracas", "Lima"],
+    respuesta: "Caracas"
   },
   {
-    question: "¿Qué me hace más feliz?",
-    options: ["Estar contigo", "Tener mucho dinero", "Dormir todo el día", "Irme de fiesta"],
-    answer: "Estar contigo"
-  },
-  {
-    question: "¿Cuál es mi segundo  nombre?",
-    options: ["carlos ", "luiz", "Andres", "No tiene segundo nombre"],
-    answer: "Andres " // Cambia esto según tu novia 💘
-  },
-  {
-    question: "¿Cuál es mi comida favorita?",
-    options: ["Pizza", "Pasta", "Sushi", "Hamburguesa"],
-    answer: "Pasta" // Personaliza según lo que le gusta a ella 🍕
-  },
-  {
-    question: "¿Qué día es mi cumpleaños ?",
-    options: ["14 de febrero", "7 de diciembre", "1 de mayo", "No recuerdo 😅"],
-    answer: "7 de diciembre" // O el día real si tienen uno 💑
+    pregunta: "¿Qué estudio?",
+    opciones: ["Medicina", "Arquitectura", "Ingeniería Electrónica", "Derecho"],
+    respuesta: "Ingeniería Electrónica"
   }
 ];
 
-let currentQuestionIndex = -1;
-const quizContainer = document.getElementById("quiz-container");
-const nextButton = document.getElementById("next-btn");
+let preguntaActual = 0;
+let puntaje = 0;
 
-function getRandomQuestionIndex(excludeIndex) {
-  let newIndex;
-  do {
-    newIndex = Math.floor(Math.random() * questions.length);
-  } while (newIndex === excludeIndex);
-  return newIndex;
-}
+const contenedor = document.getElementById('quiz-container');
+const botonSiguiente = document.getElementById('next-btn');
+const puntajeElemento = document.getElementById('score');
 
-function showQuestion() {
-  quizContainer.innerHTML = "";
-  currentQuestionIndex = getRandomQuestionIndex(currentQuestionIndex);
-  const q = questions[currentQuestionIndex];
+function mostrarPregunta() {
+  const actual = preguntas[preguntaActual];
+  contenedor.innerHTML = `
+    <h2>${actual.pregunta}</h2>
+    ${actual.opciones.map(opcion => `
+      <button class="opcion">${opcion}</button>
+    `).join('')}
+  `;
 
-  const questionElement = document.createElement("h2");
-  questionElement.innerText = q.question;
-  quizContainer.appendChild(questionElement);
+  const botones = document.querySelectorAll('.opcion');
+  botones.forEach(boton => {
+    boton.addEventListener('click', () => {
+      if (boton.textContent === actual.respuesta) {
+        puntaje++;
+        boton.style.backgroundColor = '#b3ffb3'; // verde
+      } else {
+        boton.style.backgroundColor = '#ffb3b3'; // rojo
+      }
 
-  q.options.forEach(opt => {
-    const btn = document.createElement("button");
-    btn.className = "option";
-    btn.innerText = opt;
-    btn.onclick = () => checkAnswer(btn, q.answer);
-    quizContainer.appendChild(btn);
+      puntajeElemento.textContent = `Puntaje: ${puntaje}`;
+      botones.forEach(b => b.disabled = true);
+      botonSiguiente.disabled = false;
+    });
   });
-
-  nextButton.disabled = true;
 }
 
-function checkAnswer(button, correctAnswer) {
-  const options = document.querySelectorAll(".option");
-  options.forEach(opt => opt.disabled = true);
-
-  if (button.innerText === correctAnswer) {
-    button.style.backgroundColor = "#a2f5a2";
-    nextButton.disabled = false;
+botonSiguiente.addEventListener('click', () => {
+  preguntaActual++;
+  if (preguntaActual < preguntas.length) {
+    mostrarPregunta();
+    botonSiguiente.disabled = true;
   } else {
-    button.style.backgroundColor = "#f5a2a2";
-    showSadFace();
-    setTimeout(() => {
-      alert("😢 ¡Ups! Te equivocaste... vamos con otra pregunta.");
-      showQuestion();
-    }, 1000);
-  }
-}
+    let mensajeFinal = "";
+    if (puntaje === preguntas.length) {
+      mensajeFinal = "🌟 ¡Vaya, me conoces! Te mando un beso 😘";
+    } else if (puntaje === 0) {
+      mensajeFinal = "💀 Tas jodida 😬";
+    } else if (puntaje <= preguntas.length / 2) {
+      mensajeFinal = "😢 Pensé que me conocías mejor...";
+    } else {
+      mensajeFinal = "😊 ¡Lo hiciste bien, pero hay cosas que mejorar!";
+    }
 
-function showSadFace() {
-  if (!document.querySelector(".sad-face")) {
-    const sadFace = document.createElement("div");
-    sadFace.className = "sad-face";
-    sadFace.innerText = "😢 Esa no era la correcta...";
-    quizContainer.appendChild(sadFace);
+    contenedor.innerHTML = `<h2>💖 ¡Juego terminado! 💖</h2>
+    <p>Tu puntaje final fue: <strong>${puntaje} / ${preguntas.length}</strong></p>
+    <p>${mensajeFinal}</p>`;
+    botonSiguiente.style.display = 'none';
   }
-}
-
-nextButton.addEventListener("click", () => {
-  showQuestion();
 });
 
-// Inicia el juego
-showQuestion();
-
+mostrarPregunta();
